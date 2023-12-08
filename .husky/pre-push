@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+if ! npm run build --workspace=kibana-security-health-check
+then
+    echo "Cannot build project."
+    exit 1
+fi
+
+exit 0

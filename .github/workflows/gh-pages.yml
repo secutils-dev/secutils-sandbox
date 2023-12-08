@@ -1,0 +1,58 @@
+name: Secutils Sandbox Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'LICENSE'
+      - '*.md'
+      - '.husky/**'
+
+jobs:
+  build:
+    name: Build (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+
+      - name: Set Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --workspace=kibana-security-health-check
+
+      - name: Build
+        run: npm run build --workspace=kibana-security-health-check
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          name: github-pages
+          path: './kibana-security-health-check/dist'
+
+  deploy:
+    name: Deploy (Linux)
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
