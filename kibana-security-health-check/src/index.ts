@@ -1,11 +1,15 @@
 interface State {
   headers: Record<string, string>;
   resources: {
-    external: WebPageResource[];
+    external: ExternalWebPageResource[];
     internalCount: number;
     internalTotalSize: string;
   };
   injectedMetadata: Record<string, unknown>;
+}
+
+interface ExternalWebPageResource extends Omit<WebPageResource, 'data'> {
+  size: string;
 }
 
 interface WebPageResource {
@@ -55,7 +59,11 @@ export async function run(
       Object.entries(responseHeaders).filter(([key]) => TRACKED_RESPONSE_HEADERS.includes(key.toLowerCase())),
     ),
     resources: {
-      external: externalResources,
+      external: externalResources.map((resource) => ({
+        url: resource.url,
+        type: resource.type,
+        size: formatBytes(resource.data.length, 3),
+      })),
       internalCount: internalResources.length,
       internalTotalSize: formatBytes(
         internalResources.reduce((sum, res) => sum + res.data.length, 0),
