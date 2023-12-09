@@ -5,6 +5,7 @@ interface State {
     internalCount: number;
     internalTotalSize: string;
   };
+  injectedMetadata: Record<string, unknown>;
 }
 
 interface WebPageResource {
@@ -24,11 +25,11 @@ const TRACKED_RESPONSE_HEADERS = [
   'x-frame-options',
 ];
 
-export function run(
+export async function run(
   previousContent: State | undefined,
   remoteResources: WebPageResource[],
   responseHeaders: Record<string, string>,
-): State {
+): Promise<State> {
   const { externalResources, internalResources } = remoteResources.reduce(
     (acc, resource) => {
       if (resource.url.startsWith(location.origin)) {
@@ -41,6 +42,11 @@ export function run(
     { externalResources: [] as WebPageResource[], internalResources: [] as WebPageResource[] },
   );
 
+  // Fetch the content of the page.
+  const dom = new DOMParser().parseFromString(await (await fetch(location.href)).text(), 'text/html');
+  const injectedMetadata = JSON.parse(
+    dom.querySelector('kbn-injected-metadata')?.getAttribute('data') ?? '{}',
+  ) as Record<string, unknown>;
   return {
     headers: Object.fromEntries(
       Object.entries(responseHeaders).filter(([key]) => TRACKED_RESPONSE_HEADERS.includes(key.toLowerCase())),
@@ -53,9 +59,9 @@ export function run(
         3,
       ),
     },
+    injectedMetadata,
   };
 }
-
 function formatBytes(bytes: number, decimals: number) {
   if (bytes == 0) {
     return '0 Bytes';
