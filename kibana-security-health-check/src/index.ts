@@ -25,6 +25,8 @@ const TRACKED_RESPONSE_HEADERS = [
   'x-frame-options',
 ];
 
+const TRACKED_INJECTED_METADATA = ['anonymousStatusPage', 'clusterInfo', 'csp', 'env', 'externalUrl'];
+
 export async function run(
   previousContent: State | undefined,
   remoteResources: WebPageResource[],
@@ -47,6 +49,7 @@ export async function run(
   const injectedMetadata = JSON.parse(
     dom.querySelector('kbn-injected-metadata')?.getAttribute('data') ?? '{}',
   ) as Record<string, unknown>;
+
   return {
     headers: Object.fromEntries(
       Object.entries(responseHeaders).filter(([key]) => TRACKED_RESPONSE_HEADERS.includes(key.toLowerCase())),
@@ -59,7 +62,9 @@ export async function run(
         3,
       ),
     },
-    injectedMetadata,
+    injectedMetadata: Object.fromEntries(
+      Object.entries(injectedMetadata).filter(([key]) => TRACKED_INJECTED_METADATA.includes(key)),
+    ),
   };
 }
 function formatBytes(bytes: number, decimals: number) {
