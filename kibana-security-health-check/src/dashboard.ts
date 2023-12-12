@@ -38,7 +38,7 @@ export async function run(previousContent: string | undefined, params: Params): 
   }
 
   const lastRevision = revisions[revisions.length - 1];
-  const kibanaMetadata = JSON.parse(lastRevision.data) as KibanaMetadata;
+  const kibanaMetadata = (JSON.parse(lastRevision.data) as { injectedMetadata: KibanaMetadata }).injectedMetadata;
   const state = `
 # Project information
 |||
