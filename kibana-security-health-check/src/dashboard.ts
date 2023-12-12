@@ -35,13 +35,14 @@ export async function run(previousContent: string | undefined, params: Params): 
     lastRevisionId: revisions.length > 0 ? revisions[revisions.length - 1].id : '',
   };
 
-  const state = `# Project information
-🚧
+  const state = `
+# Project information
+:construction:
 # Security headers
 ## Content Security Policy
-Status: ${meta.lastRevisionId === previousMeta?.lastRevisionId || !previousMeta ? '✅' : '⚠'} [view policy](${
-    location.origin
-  }/ws/web_security__csp__policies?x-user-share-id=${params.targetCspShareId})
+Status: ${
+    meta.lastRevisionId === previousMeta?.lastRevisionId || !previousMeta ? ':white_check_mark:' : ':red_circle:'
+  } [view policy](${location.origin}/ws/web_security__csp__policies?x-user-share-id=${params.targetCspShareId})
 `;
 
   return prependMeta(state, meta);
@@ -50,7 +51,7 @@ Status: ${meta.lastRevisionId === previousMeta?.lastRevisionId || !previousMeta 
 // HACK: Prepend the meta to the markdown content as part of the link to not clutter the markdown.
 // NOTE: There should be a built-in way to specify metadata and user-facing content separately.
 function prependMeta(markdownState: string, meta: Meta): string {
-  return `[ℹ️️](https://meta.secutils.dev/${encodeURIComponent(JSON.stringify(meta))})${markdownState}`;
+  return `[:information:️️](https://meta.secutils.dev/${encodeURIComponent(JSON.stringify(meta))})${markdownState}`;
 }
 
 function extractMeta(markdownState: string): Meta {
