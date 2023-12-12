@@ -35,8 +35,12 @@ export async function run(previousContent: string | undefined, params: Params): 
     lastRevisionId: revisions.length > 0 ? revisions[revisions.length - 1].id : '',
   };
 
-  const state = `## Dashboard
-* Content Security Policy: ${meta.lastRevisionId === previousMeta?.lastRevisionId ? '✅' : '⚠'} ([view](${
+  const state = `
+# Project information
+🚧
+# Security headers
+## Content Security Policy
+Status: ${meta.lastRevisionId === previousMeta?.lastRevisionId || !previousMeta ? '✅' : '⚠'} [view policy](${
     location.origin
   }/ws/web_security__csp__policies?x-user-share-id=${params.targetCspShareId}))
 `;
