@@ -26,6 +26,7 @@ export async function run(previousContent: string | undefined, params: Params): 
       headers: {
         Authorization: `Basic ${btoa(`${params.credentials.username}:${params.credentials.password}`)}`,
       },
+      body: JSON.stringify({ refresh: false, calculateDiff: false }),
     })
   ).json()) as WebPageContentRevision[];
 
