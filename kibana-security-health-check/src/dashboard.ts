@@ -25,6 +25,7 @@ export async function run(previousContent: string | undefined, params: Params): 
       method: 'POST',
       headers: {
         Authorization: `Basic ${btoa(`${params.credentials.username}:${params.credentials.password}`)}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ refresh: false, calculateDiff: false }),
     })
