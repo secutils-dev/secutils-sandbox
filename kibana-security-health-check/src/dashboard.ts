@@ -51,7 +51,9 @@ Status: ${
 // HACK: Prepend the meta to the markdown content as part of the link to not clutter the markdown.
 // NOTE: There should be a built-in way to specify metadata and user-facing content separately.
 function prependMeta(markdownState: string, meta: Meta): string {
-  return `[:information:️️](https://meta.secutils.dev/${encodeURIComponent(JSON.stringify(meta))})${markdownState}`;
+  return `[:information_source:️️](https://meta.secutils.dev/${encodeURIComponent(
+    JSON.stringify(meta),
+  )})${markdownState}`;
 }
 
 function extractMeta(markdownState: string): Meta {
