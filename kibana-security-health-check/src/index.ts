@@ -17,3 +17,26 @@ export interface SecurityResponseHeaders {
   'x-found-handling-cluster': string;
   'x-frame-options': string;
 }
+
+export interface KibanaMetadata {
+  anonymousStatusPage: boolean;
+  clusterInfo: {
+    cluster_build_flavor: 'serverless';
+    cluster_name: 'b5781f679cf342218a5fb77db34863d2';
+    cluster_uuid: '8s9cUhNXR4Wa9oUu_czSPw';
+    cluster_version: '8.11.0';
+  };
+  env: {
+    mode: {
+      name: string;
+    };
+    packageInfo: {
+      branch: string;
+      buildDate: string;
+      buildFlavor: string;
+      buildNum: number;
+      buildSha: string;
+      version: string;
+    };
+  };
+}

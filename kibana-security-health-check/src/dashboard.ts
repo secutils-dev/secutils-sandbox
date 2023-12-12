@@ -1,3 +1,5 @@
+import type { KibanaMetadata } from './index';
+
 interface Meta {
   lastRevisionId: string;
 }
@@ -31,21 +33,37 @@ export async function run(previousContent: string | undefined, params: Params): 
     })
   ).json()) as WebPageContentRevision[];
 
-  const meta: Meta = {
-    lastRevisionId: revisions.length > 0 ? revisions[revisions.length - 1].id : '',
-  };
+  if (revisions.length === 0) {
+    return prependMeta(`:red_circle: Data is not available`, { lastRevisionId: '' });
+  }
 
+  const lastRevision = revisions[revisions.length - 1];
+  const kibanaMetadata = JSON.parse(lastRevision.data) as KibanaMetadata;
   const state = `
 # Project information
-:construction:
+|||
+| ------ | ----------- |
+| **Environment**    | ${kibanaMetadata.env.mode.name} |
+| **Branch** | ${kibanaMetadata.env.packageInfo.branch} |
+| **Project ID / Cluster Name** | ${kibanaMetadata.clusterInfo?.cluster_name ?? '?'} |
+| **Build Flavour** | ${kibanaMetadata.env.packageInfo.buildFlavor} |
+| **Build Date** | ${kibanaMetadata.env.packageInfo.buildDate} |
+| **Build Number**    | ${kibanaMetadata.env.packageInfo.buildNum} |
+| **Build Commit**    | [${kibanaMetadata.env.packageInfo.buildSha.slice(
+    6,
+  )}](https://github.com/elastic/kibana/commit/${kibanaMetadata.env.packageInfo.buildSha}) |
+| **Version**    | ${kibanaMetadata.env.packageInfo.version}|
+
 # Security headers
 ## Content Security Policy
 Status: ${
-    meta.lastRevisionId === previousMeta?.lastRevisionId || !previousMeta ? ':white_check_mark:' : ':red_circle:'
+    lastRevision.id === previousMeta?.lastRevisionId || !previousMeta ? ':white_check_mark:' : ':red_circle:'
   } [view policy](${location.origin}/ws/web_security__csp__policies?x-user-share-id=${params.targetCspShareId})
 `;
 
-  return prependMeta(state, meta);
+  return prependMeta(state, {
+    lastRevisionId: lastRevision.id,
+  });
 }
 
 // HACK: Prepend the meta to the markdown content as part of the link to not clutter the markdown.
