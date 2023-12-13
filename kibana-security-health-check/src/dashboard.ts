@@ -80,55 +80,26 @@ export async function run(previousContent: string | undefined, params: Params): 
 | **Version**    | ${injectedMetadata.env.packageInfo.version}|
 
 # Security headers
-## ${
-    responseHeaders['content-security-policy'] === expectedCsp.policyText ? ':white_check_mark:' : ':red_circle:'
-  } Content Security Policy
-\`\`\`
-${responseHeaders['content-security-policy']}
-\`\`\`
+${renderHeaderContent('Content Security Policy', responseHeaders['content-security-policy'], expectedCsp.policyText)}
 [**:mag_right: Inspect**](${location.origin}/ws/web_security__csp__policies?x-user-share-id=${expectedCsp.userShareId})
-## ${
-    responseHeaders['cross-origin-opener-policy'] === params.expected.crossOriginOpenerPolicy
-      ? ':white_check_mark:'
-      : ':red_circle:'
-  } Cross Origin Opener Policy
-\`\`\`
-${responseHeaders['cross-origin-opener-policy']}
-\`\`\`
-## ${
-    responseHeaders['permissions-policy'] === params.expected.permissionsPolicy ? ':white_check_mark:' : ':red_circle:'
-  } Permissions Policy
-\`\`\`
-${responseHeaders['permissions-policy']}
-\`\`\`
-## ${
-    responseHeaders['referrer-policy'] === params.expected.referrerPolicy ? ':white_check_mark:' : ':red_circle:'
-  } Referrer Policy
-\`\`\`
-${responseHeaders['referrer-policy']}
-\`\`\`
-## ${
-    responseHeaders['strict-transport-security'] === params.expected.strictTransportSecurity
-      ? ':white_check_mark:'
-      : ':red_circle:'
-  } Strict Transport Security Policy
-\`\`\`
-${responseHeaders['strict-transport-security']}
-\`\`\`
-## ${
-    responseHeaders['x-content-type-options'] === params.expected.xContentTypeOptions
-      ? ':white_check_mark:'
-      : ':red_circle:'
-  } Content Type Options
-\`\`\`
-${responseHeaders['x-content-type-options']}
-\`\`\`
-## ${
-    responseHeaders['x-frame-options'] === params.expected.xFrameOptions ? ':white_check_mark:' : ':red_circle:'
-  } Frame Options
-\`\`\`
-${responseHeaders['x-frame-options']}
-\`\`\`
+${renderHeaderContent(
+  'Cross Origin Opener Policy',
+  responseHeaders['cross-origin-opener-policy'],
+  params.expected.crossOriginOpenerPolicy,
+)}
+${renderHeaderContent('Permissions Policy', responseHeaders['permissions-policy'], params.expected.permissionsPolicy)}
+${renderHeaderContent('Referrer Policy', responseHeaders['referrer-policy'], params.expected.referrerPolicy)}
+${renderHeaderContent(
+  'Strict Transport Security Policy',
+  responseHeaders['strict-transport-security'],
+  params.expected.strictTransportSecurity,
+)}
+${renderHeaderContent(
+  'Content Type Options',
+  responseHeaders['x-content-type-options'],
+  params.expected.xContentTypeOptions,
+)}
+${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], params.expected.xFrameOptions)}
 `;
 
   return prependMeta(state, {
@@ -179,4 +150,11 @@ async function getExpectedContentSecurityPolicy(
     userShareId: getResponse.userShare.id,
     policyText: serializeResponse,
   };
+}
+
+function renderHeaderContent(label: string, actualValue: string, expectedValue: string): string {
+  return `## ${actualValue === expectedValue ? ':white_check_mark:' : ':red_circle:'} ${label}
+\`\`\`
+${actualValue === expectedValue ? actualValue : `Expected: ${expectedValue}\nActual:   ${actualValue}`}
+\`\`\``;
 }
