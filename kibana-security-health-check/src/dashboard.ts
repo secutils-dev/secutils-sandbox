@@ -127,7 +127,6 @@ async function getExpectedContentSecurityPolicy(
   // Retrieve policy to get user share ID.
   const getResponse = (await (
     await fetch(`${location.origin}/api/utils/web_security/csp/${contentSecurityPolicyId}`, {
-      credentials: 'omit',
       headers: { Authorization: authorizationHeader, Accept: 'application/json' },
     })
   ).json()) as SecutilsGetContentSecurityPolicyResponse;
@@ -137,14 +136,14 @@ async function getExpectedContentSecurityPolicy(
   }
 
   // Fetch serialized policy
-  const serializeResponse = await (
+  const serializeResponse = (await (
     await fetch('https://dev.secutils.dev/api/utils/web_security/csp/018c5b81-2908-7583-99e5-0c03fc9f827e/serialize', {
       credentials: 'omit',
-      headers: { Authorization: authorizationHeader, Accept: 'text/plain, */*', 'Content-Type': 'application/json' },
+      headers: { Authorization: authorizationHeader, Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'enforcingHeader' }),
       method: 'POST',
     })
-  ).text();
+  ).json()) as string;
 
   return {
     userShareId: getResponse.userShare.id,
