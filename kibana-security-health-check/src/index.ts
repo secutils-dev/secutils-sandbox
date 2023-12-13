@@ -1,6 +1,11 @@
 export { run as dashboardRun } from './dashboard';
 export { run as trackerRun } from './tracker';
 
+export interface Credentials {
+  username: string;
+  password: string;
+}
+
 export interface WebPageResource {
   url: string;
   data: string;
@@ -39,4 +44,20 @@ export interface KibanaMetadata {
       version: string;
     };
   };
+}
+
+export interface SecutilsGetContentSecurityPolicyResponse {
+  policy: SecutilsContentSecurityPolicy;
+  userShare?: SecutilsUserShare;
+}
+
+export interface SecutilsContentSecurityPolicy {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+export interface SecutilsUserShare {
+  id: string;
+  createdAt: number;
 }
