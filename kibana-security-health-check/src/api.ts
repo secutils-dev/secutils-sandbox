@@ -2,14 +2,16 @@ interface MetricsObject {
   payload: Response;
 }
 
-export async function run(previousContent: string | undefined) {
+export function run(previousContent: string | undefined) {
+  // placeholder to use previousContent in the future
+  const previousMeta = previousContent || undefined;
   document.addEventListener('DOMContentLoaded', () => {
     const windowFetch = window.fetch;
     const metricsObject = {} as MetricsObject;
 
     // Override Fetch
     window.fetch = async function (resource, init) {
-      const response = await windowFetch.apply(this, arguments);
+      const response = await windowFetch(resource, init);
       console.log('Fetch call to URL:', resource, 'Status:', response.status);
 
       // Clone the response so that it's still usable after reading
