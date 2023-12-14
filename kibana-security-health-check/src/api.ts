@@ -2,9 +2,11 @@ interface MetricsObject {
   payload: Response;
 }
 
-export function run(previousContent: string | undefined) {
+export function run() {
   // placeholder to use previousContent in the future
-  const previousMeta = previousContent || undefined;
+  // previousContent: string | undefined
+  //   const previousMeta = previousContent || undefined;
+
   document.addEventListener('DOMContentLoaded', () => {
     const windowFetch = window.fetch;
     const metricsObject = {} as MetricsObject;
