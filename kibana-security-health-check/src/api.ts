@@ -11,10 +11,10 @@ export async function run(params: Params) {
   const body = params.body && typeof params.body === 'string' ? params.body : JSON.stringify(params.body);
 
   const response = await fetch(url, { method, headers, body });
-
+  const responseBody = await response.json();
   return {
     status: response.status,
     headers: Array.from(response.headers.entries()),
-    body,
+    body: JSON.stringify(responseBody),
   };
 }
