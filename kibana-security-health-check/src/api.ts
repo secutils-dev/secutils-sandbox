@@ -1,10 +1,8 @@
-interface Params {}
-
 interface MetricsObject {
-  payload: any;
-  meta: any;
+  payload: Response;
 }
-export async function run(previousContent: string | undefined, params: Params) {
+
+export async function run(previousContent: string | undefined) {
   document.addEventListener('DOMContentLoaded', () => {
     const windowFetch = window.fetch;
     const metricsObject = {} as MetricsObject;
