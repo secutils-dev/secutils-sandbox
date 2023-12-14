@@ -1,28 +1,20 @@
-interface MetricsObject {
-  payload: Response;
+interface Params {
+  url: string;
+  method: string;
+  headers: [string, string][];
+  body: string;
 }
 
-export function run() {
-  // placeholder to use previousContent in the future
-  // previousContent: string | undefined
-  //   const previousMeta = previousContent || undefined;
+export async function run(params: Params) {
+  const { url, method, headers } = params;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const windowFetch = window.fetch;
-    const metricsObject = {} as MetricsObject;
+  const body = params.body && typeof params.body === 'string' ? params.body : JSON.stringify(params.body);
 
-    // Override Fetch
-    window.fetch = async function (resource, init) {
-      const response = await windowFetch(resource, init);
-      console.log('Fetch call to URL:', resource, 'Status:', response.status);
+  const response = await fetch(url, { method, headers, body });
 
-      // Clone the response so that it's still usable after reading
-      const clonedResponse = response.clone();
-
-      metricsObject.payload = clonedResponse;
-      return response;
-    };
-
-    return metricsObject;
-  });
+  return {
+    status: response.status,
+    headers: Array.from(response.headers.entries()),
+    body,
+  };
 }
