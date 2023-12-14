@@ -116,7 +116,7 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
 | **${injectedMetadata.anonymousStatusPage ? ':red_circle:' : ':large_green_circle:'} Anonymous** | ${
     injectedMetadata.anonymousStatusPage ? 'Yes' : 'No'
   } |
-| **:yellow_circle: Security Plugin Status** | Unknown |
+| **:large_yellow_circle: Security Plugin Status** | Unknown |
 
 ## Honeypot
 |||
