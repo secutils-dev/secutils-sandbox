@@ -11,6 +11,8 @@ export async function run(params: Params) {
   const body = params.body && typeof params.body === 'string' ? params.body : JSON.stringify(params.body);
 
   const response = await fetch(url, { method, headers, body });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const responseBody = await response.json();
   return {
     status: response.status,
