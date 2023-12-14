@@ -3,16 +3,22 @@ import type {
   KibanaMetadata,
   SecurityResponseHeaders,
   SecutilsGetContentSecurityPolicyResponse,
+  SecutilsResponderRequest,
 } from './index';
 
 interface Meta {
   lastRevisionId: string;
+  lastHoneypotTimestamp?: number;
 }
 
 const META_REGEX = /\(https:\/\/meta.secutils.dev\/(.+)\)/gm;
 
+const HONEYPOT_SENSITIVE_HEADERS_TO_TRACK = ['cookie', 'authorization'];
+const HONEYPOT_HEADERS_TO_TRACK = ['referer', ...HONEYPOT_SENSITIVE_HEADERS_TO_TRACK];
+
 interface Params {
   targetContentTrackerId: string;
+  honeypotResponderId: string;
   credentials: Credentials;
   expected: {
     contentSecurityPolicyId: string;
@@ -51,13 +57,15 @@ export async function run(previousContent: string | undefined, params: Params): 
   }
 
   const lastRevision = revisions[revisions.length - 1];
-  if (previousContent && lastRevision.id === previousMeta?.lastRevisionId) {
-    return previousContent;
-  }
-
   const expectedCsp = await getExpectedContentSecurityPolicy(
     params.credentials,
     params.expected.contentSecurityPolicyId,
+  );
+
+  const honeypotHeaders = await getHoneypotHeaders(
+    params.credentials,
+    params.honeypotResponderId,
+    previousMeta?.lastHoneypotTimestamp,
   );
 
   const { injectedMetadata, headers: responseHeaders } = JSON.parse(lastRevision.data) as {
@@ -100,10 +108,32 @@ ${renderHeaderContent(
   params.expected.xContentTypeOptions,
 )}
 ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], params.expected.xFrameOptions)}
+
+# Miscellaneous
+## Status Page
+|||
+| ------ | ----------- |
+| **${injectedMetadata.anonymousStatusPage ? ':red_circle:' : ':large_green_circle:'} Anonymous** | ${
+    injectedMetadata.anonymousStatusPage ? 'Yes' : 'No'
+  } |
+| **:yellow_circle: Security Plugin Status** | Unknown |
+
+## Honeypot
+|||
+| ------ | ----------- |
+| **${
+    HONEYPOT_SENSITIVE_HEADERS_TO_TRACK.some((sensitiveHeaderName) => honeypotHeaders.headers.has(sensitiveHeaderName))
+      ? ':red_circle:'
+      : ':large_green_circle:'
+  } Captured Headers**    | ${[...honeypotHeaders.headers]
+    .filter((headerName) => HONEYPOT_HEADERS_TO_TRACK.includes(headerName))
+    .join(', ')} |
+[**:mag_right: Inspect**](${location.origin}/ws/webhooks__responders)
 `;
 
   return prependMeta(state, {
     lastRevisionId: lastRevision.id,
+    lastHoneypotTimestamp: honeypotHeaders.lastHoneypotTimestamp,
   });
 }
 
@@ -152,8 +182,41 @@ async function getExpectedContentSecurityPolicy(
 }
 
 function renderHeaderContent(label: string, actualValue: string, expectedValue: string): string {
-  return `## ${actualValue === expectedValue ? ':white_check_mark:' : ':red_circle:'} ${label}
+  return `## ${actualValue === expectedValue ? ':large_green_circle:' : ':red_circle:'} ${label}
 \`\`\`
 ${actualValue === expectedValue ? actualValue : `Expected: ${expectedValue}\nActual:   ${actualValue}`}
 \`\`\``;
+}
+
+async function getHoneypotHeaders(
+  credentials: Credentials,
+  honeypotResponderId: string,
+  lastHoneypotTimestamp?: number,
+): Promise<{ lastHoneypotTimestamp?: number; headers: Set<string> }> {
+  const authorizationHeader = `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`;
+  // Retrieve policy to get user share ID.
+  const responderRequests = (await (
+    await fetch(`${location.origin}/api/utils/webhooks/responders/${honeypotResponderId}/history`, {
+      method: 'POST',
+      headers: { Authorization: authorizationHeader, Accept: 'application/json' },
+    })
+  ).json()) as SecutilsResponderRequest[];
+
+  if (responderRequests.length === 0) {
+    return { headers: new Set() };
+  }
+
+  const headers = new Set<string>();
+  for (const request of responderRequests) {
+    if (lastHoneypotTimestamp && request.createdAt <= lastHoneypotTimestamp) {
+      continue;
+    }
+
+    request.headers?.forEach(([headerName]) => headers.add(headerName));
+  }
+
+  return {
+    headers,
+    lastHoneypotTimestamp: responderRequests[responderRequests.length - 1].createdAt,
+  };
 }

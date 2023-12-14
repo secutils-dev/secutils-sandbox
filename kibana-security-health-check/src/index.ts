@@ -61,3 +61,12 @@ export interface SecutilsUserShare {
   id: string;
   createdAt: number;
 }
+
+export interface SecutilsResponderRequest {
+  id: string;
+  clientAddress?: string;
+  method: string;
+  headers?: Array<[string, number[]]>;
+  body?: number[];
+  createdAt: number;
+}
