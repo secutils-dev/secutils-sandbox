@@ -1,5 +1,6 @@
 export { run as dashboardRun } from './dashboard';
 export { run as trackerRun } from './tracker';
+export { run as apiRun } from './api';
 
 export interface Credentials {
   username: string;
