@@ -89,25 +89,33 @@ export async function run(previousContent: string | undefined, params: Params): 
 
 # Security headers
 ${renderHeaderContent('Content Security Policy', responseHeaders['content-security-policy'], expectedCsp.policyText)}
-[**:mag_right: Inspect**](${location.origin}/ws/web_security__csp__policies?x-user-share-id=${expectedCsp.userShareId})
+[**:mag_right: Inspect**](${location.origin}/ws/web_security__csp__policies?x-user-share-id=${
+    expectedCsp.userShareId
+  })&nbsp;&nbsp;&nbsp;[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 ${renderHeaderContent(
   'Cross Origin Opener Policy',
   responseHeaders['cross-origin-opener-policy'],
   params.expected.crossOriginOpenerPolicy,
 )}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
 ${renderHeaderContent('Permissions Policy', responseHeaders['permissions-policy'], params.expected.permissionsPolicy)}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy)
 ${renderHeaderContent('Referrer Policy', responseHeaders['referrer-policy'], params.expected.referrerPolicy)}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
 ${renderHeaderContent(
   'Strict Transport Security Policy',
   responseHeaders['strict-transport-security'],
   params.expected.strictTransportSecurity,
 )}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security)
 ${renderHeaderContent(
   'Content Type Options',
   responseHeaders['x-content-type-options'],
   params.expected.xContentTypeOptions,
 )}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options)
 ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], params.expected.xFrameOptions)}
+[:open_book: Learn more](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options)
 
 # Miscellaneous
 ## Status Page
@@ -117,6 +125,7 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
     injectedMetadata.anonymousStatusPage ? 'Yes' : 'No'
   } |
 | **:large_yellow_circle: Security Plugin Status** | Unknown |
+[:open_book: Learn more](https://www.elastic.co/guide/en/kibana/current/access.html#status)
 
 ## Honeypot
 |||
@@ -128,7 +137,9 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
   } Captured Headers**    | ${[...honeypotHeaders.headers]
     .filter((headerName) => HONEYPOT_HEADERS_TO_TRACK.includes(headerName))
     .join(', ')} |
-[**:mag_right: Inspect**](${location.origin}/ws/webhooks__responders)
+[**:mag_right: Inspect**](${location.origin}/ws/webhooks__responders)&nbsp;&nbsp;&nbsp;[:open_book: Learn more](${
+    location.origin
+  }/docs/guides/webhooks)
 `;
 
   return prependMeta(state, {
