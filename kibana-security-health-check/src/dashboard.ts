@@ -9,6 +9,7 @@ import type {
 interface Meta {
   lastRevisionId: string;
   lastHoneypotTimestamp?: number;
+  lastInternalResources?: string;
 }
 
 const META_REGEX = /\(https:\/\/meta.secutils.dev\/(.+)\)/gm;
@@ -68,10 +69,18 @@ export async function run(previousContent: string | undefined, params: Params): 
     previousMeta?.lastHoneypotTimestamp,
   );
 
-  const { injectedMetadata, headers: responseHeaders } = JSON.parse(lastRevision.data) as {
+  const {
+    injectedMetadata,
+    headers: responseHeaders,
+    resources,
+  } = JSON.parse(lastRevision.data) as {
     headers: SecurityResponseHeaders;
     injectedMetadata: KibanaMetadata;
+    resources: { external: unknown[]; internalCount: number; internalTotalSize: string };
   };
+
+  const internalResources = `${resources.internalCount} (${resources.internalTotalSize})`;
+
   const state = `
 # Project information
 |||
@@ -127,6 +136,19 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
 | **:large_yellow_circle: Security Plugin Status** | Unknown |
 [:open_book: Learn more](https://www.elastic.co/guide/en/kibana/current/access.html#status)
 
+## Resources
+|||
+| ------ | ----------- |
+| **${resources.external.length > 0 ? ':red_circle:' : ':large_green_circle:'} External Resources** | ${
+    resources.external.length
+  } |
+| **${
+    internalResources !== previousMeta?.lastInternalResources ? ':large_yellow_circle:' : ':large_green_circle:'
+  } Internal Resources** | ${internalResources} |
+[**:mag_right: Inspect**](${location.origin}/ws/web_scraping__resources)&nbsp;&nbsp;&nbsp;[:open_book: Learn more](${
+    location.origin
+  }/docs/guides/web_scraping/resources)
+
 ## Honeypot
 |||
 | ------ | ----------- |
@@ -145,6 +167,7 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
   return prependMeta(state, {
     lastRevisionId: lastRevision.id,
     lastHoneypotTimestamp: honeypotHeaders.lastHoneypotTimestamp,
+    lastInternalResources: internalResources,
   });
 }
 
