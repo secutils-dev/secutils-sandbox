@@ -158,6 +158,7 @@ ${renderHeaderContent('Frame Options', responseHeaders['x-frame-options'], param
       : ':large_green_circle:'
   } Captured Headers**    | ${[...honeypotHeaders.headers]
     .filter((headerName) => HONEYPOT_HEADERS_TO_TRACK.includes(headerName))
+    .sort()
     .join(', ')} |
 [**:mag_right: Inspect**](${location.origin}/ws/webhooks__responders)&nbsp;&nbsp;&nbsp;[:open_book: Learn more](${
     location.origin
