@@ -5,6 +5,7 @@ import type {
   SecutilsGetContentSecurityPolicyResponse,
   SecutilsResponderRequest,
 } from './index';
+import type { WebPageContext } from '../types';
 
 interface Meta {
   lastRevisionId: string;
@@ -38,8 +39,8 @@ interface WebPageContentRevision {
   createdAt: number;
 }
 
-export async function run(previousContent: string | undefined, params: Params): Promise<string> {
-  const previousMeta = previousContent ? extractMeta(previousContent) : undefined;
+export async function run(context: WebPageContext<string>, params: Params): Promise<string> {
+  const previousMeta = context.previous ? extractMeta(context.previous) : undefined;
 
   // Fetch tracker history.
   const revisions = (await (

@@ -23,16 +23,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --workspace=kibana-security-health-check
+        run: npm ci --workspace=content-extractor-scripts
 
       - name: Build
-        run: npm run build --workspace=kibana-security-health-check
+        run: npm run build --workspace=content-extractor-scripts
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           name: github-pages
-          path: './kibana-security-health-check/dist'
+          path: './content-extractor-scripts/dist'
 
   deploy:
     name: Deploy (Linux)

@@ -2,7 +2,7 @@
 
 set -eu
 
-if ! npm run build --workspace=kibana-security-health-check
+if ! npm run build --workspace=content-extractor-scripts
 then
     echo "Cannot build project."
     exit 1

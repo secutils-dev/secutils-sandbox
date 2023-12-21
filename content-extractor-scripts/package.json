@@ -1,10 +1,20 @@
 {
   "name": "@secutils-dev/kibana-security-health-check",
   "version": "1.0.0",
-  "source": "src/index.ts",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "types": "dist/types.d.ts",
+  "targets": {
+    "fetch-api": {
+      "source": "./src/fetch-api.ts",
+      "context": "browser",
+      "outputFormat": "esmodule",
+      "isLibrary": true
+    },
+    "kibana-security-health-check": {
+      "source": "./src/kibana-security-health-check/index.ts",
+      "context": "browser",
+      "outputFormat": "esmodule",
+      "isLibrary": true
+    }
+  },
   "browserslist": ["last 2 Chrome versions"],
   "devDependencies": {
     "@eslint/eslintrc": "^2.1.4",
@@ -25,7 +35,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "prebuild": "eslint . && rm -rf dist",
+    "prebuild": "eslint ../content-extractor-scripts && rm -rf dist",
     "watch": "parcel watch",
     "build": "parcel build"
   }

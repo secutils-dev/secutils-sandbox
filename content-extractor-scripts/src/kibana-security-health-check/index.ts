@@ -7,12 +7,6 @@ export interface Credentials {
   password: string;
 }
 
-export interface WebPageResource {
-  url: string;
-  data: string;
-  type: 'script' | 'stylesheet';
-}
-
 export interface SecurityResponseHeaders {
   'content-security-policy': string;
   'cross-origin-opener-policy': string;

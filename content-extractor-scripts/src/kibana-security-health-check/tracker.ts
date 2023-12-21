@@ -1,4 +1,5 @@
-import type { SecurityResponseHeaders, WebPageResource } from './index';
+import type { SecurityResponseHeaders } from './index';
+import type { WebPageContext, WebPageResource } from '../types';
 
 interface State {
   headers: SecurityResponseHeaders;
@@ -27,12 +28,8 @@ const TRACKED_RESPONSE_HEADERS = [
 
 const TRACKED_INJECTED_METADATA = ['anonymousStatusPage', 'clusterInfo', 'csp', 'env', 'externalUrl'];
 
-export async function run(
-  previousContent: State | undefined,
-  remoteResources: WebPageResource[],
-  responseHeaders: Record<string, string>,
-): Promise<State> {
-  const { externalResources, internalResources } = remoteResources.reduce(
+export async function run(context: WebPageContext<State>): Promise<State> {
+  const { externalResources, internalResources } = context.externalResources.reduce(
     (acc, resource) => {
       if (resource.url.startsWith(location.origin)) {
         acc.internalResources.push(resource);
@@ -52,7 +49,7 @@ export async function run(
 
   return {
     headers: Object.fromEntries(
-      Object.entries(responseHeaders).filter(([key]) => TRACKED_RESPONSE_HEADERS.includes(key.toLowerCase())),
+      Object.entries(context.responseHeaders).filter(([key]) => TRACKED_RESPONSE_HEADERS.includes(key.toLowerCase())),
     ) as unknown as SecurityResponseHeaders,
     resources: {
       external: externalResources.map((resource) => ({
