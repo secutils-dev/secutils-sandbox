@@ -8,6 +8,12 @@
       "outputFormat": "esmodule",
       "isLibrary": true
     },
+    "markdown-table": {
+      "source": "./src/markdown-table.ts",
+      "context": "browser",
+      "outputFormat": "esmodule",
+      "isLibrary": true
+    },
     "kibana-security-health-check": {
       "source": "./src/kibana-security-health-check/index.ts",
       "context": "browser",
@@ -16,6 +22,9 @@
     }
   },
   "browserslist": ["last 2 Chrome versions"],
+  "dependencies": {
+    "markdown-table": "^3.0.3"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^2.1.4",
     "@parcel/config-default": "^2.10.3",
