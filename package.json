@@ -1,10 +1,11 @@
 {
   "workspaces": [
-    "content-extractor-scripts"
+    "content-extractor-scripts",
+    "responder-scripts"
   ],
   "devDependencies": {
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
+    "@commitlint/cli": "^18.4.4",
+    "@commitlint/config-conventional": "^18.4.4",
     "husky": "^8.0.3"
   },
   "commitlint": {

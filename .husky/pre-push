@@ -2,7 +2,7 @@
 
 set -eu
 
-if ! npm run build --workspace=content-extractor-scripts
+if ! npm run build --ws
 then
     echo "Cannot build project."
     exit 1

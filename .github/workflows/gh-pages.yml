@@ -23,16 +23,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --workspace=content-extractor-scripts
+        run: npm ci --ws
 
       - name: Build
-        run: npm run build --workspace=content-extractor-scripts
+        run: npm run build --ws
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           name: github-pages
-          path: './content-extractor-scripts/dist'
+          path: './dist'
 
   deploy:
     name: Deploy (Linux)

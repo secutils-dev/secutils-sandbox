@@ -1,32 +1,15 @@
 {
-  "name": "@secutils-dev/kibana-security-health-check",
+  "name": "@secutils-dev/responder-scripts",
   "version": "1.0.0",
   "targets": {
-    "fetch-api": {
-      "source": "./src/fetch-api.ts",
-      "distDir": "../dist/content-extractor-scripts",
-      "context": "browser",
+    "png": {
+      "source": "./src/png-generator.ts",
+      "distDir": "../dist/responder-scripts",
+      "context": "node",
       "outputFormat": "esmodule",
-      "isLibrary": true
-    },
-    "markdown-table": {
-      "source": "./src/markdown-table.ts",
-      "distDir": "../dist/content-extractor-scripts",
-      "context": "browser",
-      "outputFormat": "esmodule",
-      "isLibrary": true
-    },
-    "kibana-security-health-check": {
-      "source": "./src/kibana-security-health-check/index.ts",
-      "distDir": "../dist/content-extractor-scripts",
-      "context": "browser",
-      "outputFormat": "esmodule",
+      "sourceMap": false,
       "isLibrary": true
     }
-  },
-  "browserslist": ["last 2 Chrome versions"],
-  "dependencies": {
-    "markdown-table": "^3.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.0",
@@ -47,7 +30,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "prebuild": "eslint ../content-extractor-scripts",
+    "prebuild": "eslint ../responder-scripts",
     "watch": "parcel watch",
     "build": "parcel build"
   }
