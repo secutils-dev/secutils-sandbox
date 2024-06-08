@@ -4,9 +4,9 @@
     "responder-scripts"
   ],
   "devDependencies": {
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
-    "husky": "^8.0.3"
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "husky": "^9.0.11"
   },
   "commitlint": {
     "extends": [
