@@ -9,6 +9,13 @@
       "outputFormat": "esmodule",
       "isLibrary": true
     },
+    "github-codeowner-file": {
+      "source": "./src/github-codeowner-file.ts",
+      "distDir": "../dist/content-extractor-scripts",
+      "context": "browser",
+      "outputFormat": "esmodule",
+      "isLibrary": true
+    },
     "markdown-table": {
       "source": "./src/markdown-table.ts",
       "distDir": "../dist/content-extractor-scripts",
