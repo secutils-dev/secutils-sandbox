@@ -1,7 +1,7 @@
 import type { WebPageContext } from './types';
 
 export async function run(context: WebPageContext, owner: string, repo: string, teams: string[]): Promise<string> {
-  const codeOwnersUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/CODEOWNERS`;
+  const codeOwnersUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/.github/CODEOWNERS`;
   const lines = (await fetch(codeOwnersUrl).then((response) => response.text())).split('\n') ?? [];
 
   const getCommitLink = async (path: string) => {
