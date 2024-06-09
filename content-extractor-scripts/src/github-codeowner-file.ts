@@ -1,9 +1,9 @@
 import type { WebPageContext } from './types';
 
-export async function run(context: WebPageContext, teams: string[]): Promise<string> {
-  const lines = document.querySelector('pre')?.textContent?.split('\n') ?? [];
+export async function run(context: WebPageContext, url: string, teams: string[]): Promise<string> {
+  const lines = (await fetch(url).then((response) => response.text())).split('\n') ?? [];
 
-  const rows: Array<Array<string | null | undefined>> = [['Owner', 'Path']];
+  const rows: Array<Array<string | null | undefined>> = [['Owners', 'Path']];
   for (const line of lines) {
     const [path, owners] = line.split(' ');
     if (teams.some((team) => owners.includes(team))) {
