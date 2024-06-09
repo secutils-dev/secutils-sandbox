@@ -8,11 +8,14 @@ export async function run(context: WebPageContext, owner: string, repo: string, 
     try {
       const commits = (await fetch(
         `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(path)}&per_page=1`,
-      ).then((response) => response.json())) as Array<{ html_url: string; commit: { author: { date: string } } }>;
+      ).then((response) => response.json())) as Array<{
+        html_url: string;
+        commit: { author: { date: string; name: string } };
+      }>;
       if (commits.length === 0) {
         return 'N/A (no commits found)';
       }
-      return `[${commits[0].commit.author.date}](${commits[0].html_url})`;
+      return `[${commits[0].commit.author.date} by ${commits[0].commit.author.name}](${commits[0].html_url})`;
     } catch {
       return 'N/A (error fetching commit)';
     }
