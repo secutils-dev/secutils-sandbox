@@ -19,9 +19,10 @@
     "markdown-table": {
       "source": "./src/markdown-table.ts",
       "distDir": "../dist/content-extractor-scripts",
-      "context": "browser",
-      "outputFormat": "esmodule",
-      "isLibrary": true
+      "context": "node",
+      "includeNodeModules": true,
+      "optimize": true,
+      "outputFormat": "esmodule"
     },
     "kibana-security-health-check": {
       "source": "./src/kibana-security-health-check/index.ts",
@@ -57,6 +58,6 @@
   "scripts": {
     "prebuild": "eslint ../content-extractor-scripts",
     "watch": "parcel watch",
-    "build": "parcel build"
+    "build": "parcel build --no-content-hash"
   }
 }

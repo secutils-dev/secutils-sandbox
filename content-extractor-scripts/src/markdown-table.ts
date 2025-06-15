@@ -1,11 +1,12 @@
-import type { WebPageContext } from './types';
+import { markdownTable } from 'markdown-table';
 
-export async function run(context: WebPageContext): Promise<string> {
-  const module = await import('markdown-table');
-  return module.markdownTable(
+import type { PageContext } from './types';
+
+export async function execute(context: PageContext): Promise<string> {
+  return markdownTable(
     [
-      ['Has previous content?', context.previous ? ':white_check_mark:' : ':x:'],
-      ['How many response headers?', Object.keys(context.responseHeaders).length.toString()],
+      ['Has previous content?', context.previousContent ? ':white_check_mark:' : ':x:'],
+      ['Params', JSON.stringify(context.params)],
       ['Current time', new Date().toISOString()],
     ],
     { align: ['l', 'c'] },
