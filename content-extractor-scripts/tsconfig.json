@@ -2,7 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "target": "ES2022",
-    "module": "NodeNext"
+    "module": "NodeNext",
+    "types": ["node"]
   },
   "include": [
     "src/**/*"
