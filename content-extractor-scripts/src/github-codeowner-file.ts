@@ -12,11 +12,15 @@ export async function extract(owner: string, repo: string, teams: string[], apiT
     : { 'X-GitHub-Api-Version': '2022-11-28' };
 
   const getCommitLink = async (path: string) => {
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
     try {
-      const commits = (await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(path)}&per_page=1`,
-        { headers },
-      ).then((response) => response.json())) as Endpoints['GET /repos/{owner}/{repo}/commits']['response']['data'];
+      const commits = (await (
+        await fetch(url, { headers })
+      ).json()) as Endpoints['GET /repos/{owner}/{repo}/commits']['response']['data'];
+      if (!Array.isArray(commits)) {
+        return `N/A (invalid response: ${JSON.stringify(commits)})`;
+      }
+
       if (commits.length === 0) {
         return 'N/A (no commits found)';
       }
