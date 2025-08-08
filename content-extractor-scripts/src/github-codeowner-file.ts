@@ -12,7 +12,7 @@ export async function extract(owner: string, repo: string, teams: string[], apiT
     : { 'X-GitHub-Api-Version': '2022-11-28' };
 
   const getCommitLink = async (path: string) => {
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${encodeURIComponent(path)}&per_page=1`;
     try {
       const commits = (await (
         await fetch(url, { headers })
