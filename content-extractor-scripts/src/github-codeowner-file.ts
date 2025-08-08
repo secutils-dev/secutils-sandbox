@@ -1,14 +1,7 @@
 import type { Endpoints } from '@octokit/types';
+import { markdownTable } from 'markdown-table';
 
-import type { WebPageContext } from './types';
-
-export async function run(
-  context: WebPageContext,
-  owner: string,
-  repo: string,
-  teams: string[],
-  apiToken?: string,
-): Promise<string> {
+export async function extract(owner: string, repo: string, teams: string[], apiToken?: string): Promise<string> {
   const codeOwnersUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/.github/CODEOWNERS`;
   const lines = (await fetch(codeOwnersUrl).then((response) => response.text())).split('\n') ?? [];
 
@@ -46,6 +39,5 @@ export async function run(
     }
   }
 
-  const module = await import('markdown-table');
-  return module.markdownTable(rows, { align: ['l', 'c'] });
+  return markdownTable(rows, { align: ['l', 'c'] });
 }

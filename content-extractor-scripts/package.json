@@ -12,9 +12,10 @@
     "github-codeowner-file": {
       "source": "./src/github-codeowner-file.ts",
       "distDir": "../dist/content-extractor-scripts",
-      "context": "browser",
-      "outputFormat": "esmodule",
-      "isLibrary": true
+      "context": "node",
+      "includeNodeModules": true,
+      "optimize": true,
+      "outputFormat": "esmodule"
     },
     "markdown-table": {
       "source": "./src/markdown-table.ts",
