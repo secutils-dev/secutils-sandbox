@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         :root {
             --output-color: #60a5fa; /* blue-400 */
@@ -44,6 +46,26 @@
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* Styles for XML View */
+        .code-line {
+            white-space: pre;
+        }
+        #decoded-xml-container.hljs {
+            background: transparent;
+        }
+
+        /* Fullscreen specific styles */
+        #decoded-panel:fullscreen {
+            background-color: #111827; /* gray-900 */
+            padding: 1rem;
+            overflow: auto;
+        }
+         #decoded-panel:fullscreen #decoded-tab-content {
+            height: calc(100vh - 80px); /* Adjust height in fullscreen */
+         }
+
+
         /* Simple scrollbar styling for a consistent dark theme */
         ::-webkit-scrollbar {
             width: 8px;
@@ -98,16 +120,20 @@
                         </button>
                     </div>
                 </div>
-                <div class="bg-gray-800/50 border border-gray-700/50 rounded-lg shadow-sm flex-grow flex flex-col">
+                <div id="decoded-panel" class="bg-gray-800/50 border border-gray-700/50 rounded-lg shadow-sm flex-grow flex flex-col">
                     <div class="border-b border-gray-700">
                         <nav class="flex" id="decoded-tabs">
                              <button class="tab-btn active" data-tab="xml">XML</button>
                              <button class="tab-btn" data-tab="attributes">Attributes</button>
                         </nav>
                     </div>
-                    <div id="decoded-tab-content" class="p-2 flex-grow">
-                        <div id="xml-tab" class="tab-content active h-full">
-                             <textarea id="decoded-xml" readonly spellcheck="false" class="editor-area w-full h-full border-none rounded-md p-2 focus:outline-none bg-transparent"></textarea>
+                    <div id="decoded-tab-content" class="p-2 flex-grow min-h-0">
+                        <div id="xml-tab" class="tab-content active h-full relative">
+                             <button id="fullscreen-btn" title="Toggle Fullscreen" class="absolute top-1 right-1 p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors z-20">
+                                <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                                <svg id="fullscreen-exit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+                             </button>
+                             <pre class="h-full overflow-auto editor-area !p-0"><code id="decoded-xml-container" class="language-xml w-full h-full p-2 bg-transparent"></code></pre>
                         </div>
                         <div id="attributes-tab" class="tab-content h-full">
                             <div class="overflow-auto h-full p-2">
@@ -130,33 +156,64 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const encodedSamlInput = document.getElementById('encoded-saml');
-    const decodedXmlOutput = document.getElementById('decoded-xml');
+    const xmlContainer = document.getElementById('decoded-xml-container');
     const copyButton = document.getElementById('copy-button');
     const shareButton = document.getElementById('share-button');
     const tabsContainer = document.getElementById('decoded-tabs');
     const attributesTableBody = document.getElementById('attributes-table-body');
     const tabContents = document.getElementById('decoded-tab-content');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const fullscreenEnterIcon = document.getElementById('fullscreen-enter-icon');
+    const fullscreenExitIcon = document.getElementById('fullscreen-exit-icon');
+    const decodedPanel = document.getElementById('decoded-panel');
+
+    let rawDecodedXml = ''; // Store the clean XML for copying
 
     // --- UTILITY FUNCTIONS ---
 
     const prettyPrintXml = (xml) => {
         const PADDING = '  ';
+        let indent = 0;
+        let formattedXml = '';
+        
+        // 1. Minify the XML to remove insignificant whitespace between tags.
+        xml = xml.replace(/>\s*</g, '><').trim();
+
+        // 2. A regex to split the XML string into parts: tags and content.
         const reg = /(>)(<)(\/*)/g;
-        let pad = 0;
         xml = xml.replace(reg, '$1\r\n$2$3');
-        return xml.split('\r\n')
-            .map(node => {
-                let padding = '';
-                if (node.match(/^<\/\w/)) pad--;
-                for (let i = 0; i < pad; i++) padding += PADDING;
-                if (node.match(/^<\w[^>]*[^\/]>.*$/)) pad++;
-                return padding + node;
-            })
-            .join('\r\n');
+
+        const lines = xml.split('\r\n');
+
+        lines.forEach(line => {
+            let trimmedLine = line.trim();
+            if (!trimmedLine) return;
+
+            let isClosingTag = trimmedLine.startsWith('</');
+            
+            // For closing tags, we decrease the indent BEFORE printing the line.
+            if (isClosingTag && indent > 0) {
+                indent--;
+            }
+
+            formattedXml += PADDING.repeat(indent) + trimmedLine + '\n';
+
+            // Increase indent ONLY for opening tags that are not self-closing and don't contain a closing tag.
+            if (trimmedLine.startsWith('<') && !isClosingTag && !trimmedLine.endsWith('/>') && !trimmedLine.includes('</')) {
+                 indent++;
+            }
+        });
+
+        return formattedXml.trim();
+    };
+
+    const buildStaticXmlView = (xmlString) => {
+        const highlightedXml = hljs.highlight(xmlString, { language: 'xml' }).value;
+        return highlightedXml;
     };
 
     const parseAndDisplayAttributes = (xmlString) => {
-        attributesTableBody.innerHTML = ''; // Clear previous attributes
+        attributesTableBody.innerHTML = '';
         if (!xmlString) return;
 
         try {
@@ -164,8 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const xmlDoc = parser.parseFromString(xmlString, "text/xml");
             const parserError = xmlDoc.querySelector("parsererror");
             if (parserError) {
-                console.error("XML Parsing Error:", parserError.textContent);
-                return;
+                console.error("XML Parsing Error:", parserError.textContent); return;
             }
 
             const attributeNodes = xmlDoc.getElementsByTagNameNS('*', 'Attribute');
@@ -176,8 +232,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (const node of attributeNodes) {
                 const name = node.getAttribute('Name') || node.getAttribute('FriendlyName') || 'N/A';
-                const valueNode = node.getElementsByTagNameNS('*', 'AttributeValue')[0];
-                const value = valueNode ? valueNode.textContent.trim() : '';
+                
+                const valueNodes = node.getElementsByTagNameNS('*', 'AttributeValue');
+                let valueHtml = '';
+                if (valueNodes.length > 0) {
+                    const values = Array.from(valueNodes).map(vn => vn.textContent.trim());
+                    valueHtml = values.join('<br>');
+                }
 
                 const row = attributesTableBody.insertRow();
                 const cellName = row.insertCell();
@@ -185,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cellName.className = "px-2 py-2 font-mono text-sm text-gray-400 align-top";
                 cellValue.className = "px-2 py-2 font-mono text-sm text-gray-200 break-all";
                 cellName.textContent = name;
-                cellValue.textContent = value;
+                cellValue.innerHTML = valueHtml; // Use innerHTML to render <br> tags
             }
         } catch (e) {
             console.error("Error parsing SAML attributes:", e);
@@ -195,24 +256,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const decodeSaml = () => {
         let samlValue = encodedSamlInput.value.trim();
-        decodedXmlOutput.classList.remove('invalid');
+        xmlContainer.classList.remove('invalid');
         
         if (!samlValue) {
-            decodedXmlOutput.value = '';
+            xmlContainer.innerHTML = '';
+            rawDecodedXml = '';
             parseAndDisplayAttributes('');
             return;
         }
 
         try {
-            try {
-                samlValue = decodeURIComponent(samlValue);
-            } catch(e) { /* Not URL encoded */ }
-            
+            try { samlValue = decodeURIComponent(samlValue); } catch(e) { /* Not URL encoded */ }
             const decodedString = atob(samlValue);
 
             if (decodedString.trim().startsWith('<')) {
                 const prettyXml = prettyPrintXml(decodedString);
-                decodedXmlOutput.value = prettyXml;
+                rawDecodedXml = prettyXml; // Store for copying
+                xmlContainer.innerHTML = buildStaticXmlView(prettyXml);
                 parseAndDisplayAttributes(prettyXml);
             } else {
                  throw new Error("Decoded content is not valid XML.");
@@ -221,9 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("SAML decoding failed:", error);
             const errorMessage = `Error: ${error.message}\n\nPlease check if the input is a valid Base64-encoded SAML document.`;
-            decodedXmlOutput.value = errorMessage;
-            decodedXmlOutput.classList.add('invalid');
-            parseAndDisplayAttributes(''); // Clear attributes on error
+            xmlContainer.textContent = errorMessage;
+            rawDecodedXml = errorMessage;
+            xmlContainer.classList.add('invalid');
+            parseAndDisplayAttributes('');
         }
     };
     
@@ -236,13 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let contentToCopy = '';
 
         if (activeTab === 'xml') {
-            contentToCopy = decodedXmlOutput.value;
+            contentToCopy = rawDecodedXml;
         } else {
             const rows = attributesTableBody.querySelectorAll('tr');
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
                 if (cells.length === 2) {
-                     contentToCopy += `${cells[0].textContent}: ${cells[1].textContent}\n`;
+                     const values = cells[1].innerHTML.replace(/<br>/g, ', ');
+                     contentToCopy += `${cells[0].textContent}: ${values}\n`;
                 }
             });
         }
@@ -251,9 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         navigator.clipboard.writeText(contentToCopy.trim()).then(() => {
             copyButton.textContent = 'Copied!';
-            setTimeout(() => {
-                copyButton.textContent = 'Copy';
-            }, 2000);
+            setTimeout(() => { copyButton.textContent = 'Copy'; }, 2000);
         });
     });
 
@@ -266,9 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         navigator.clipboard.writeText(shareUrl).then(() => {
             shareButton.textContent = 'Link Copied!';
-            setTimeout(() => {
-                shareButton.textContent = 'Share';
-            }, 2000);
+            setTimeout(() => { shareButton.textContent = 'Share'; }, 2000);
         });
     });
     
@@ -280,6 +338,27 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(`${e.target.dataset.tab}-tab`).classList.add('active');
         }
     });
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            decodedPanel.requestFullscreen().catch(err => {
+                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            fullscreenEnterIcon.classList.add('hidden');
+            fullscreenExitIcon.classList.remove('hidden');
+        } else {
+            fullscreenEnterIcon.classList.remove('hidden');
+            fullscreenExitIcon.classList.add('hidden');
+        }
+    });
+
 
     const initialize = () => {
         const urlParams = new URLSearchParams(window.location.search);
