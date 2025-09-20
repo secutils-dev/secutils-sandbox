@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAML Decoder - Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --output-color: #60a5fa; /* blue-400 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .editor-area {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            min-height: 400px;
+            background-color: #1f2937; /* gray-800 */
+            border-color: #374151; /* gray-700 */
+            color: #d1d5db; /* gray-300 */
+        }
+        .editor-area:focus {
+            outline: none;
+            border-color: #4f46e5; /* indigo-600 */
+            box-shadow: 0 0 0 2px #4f46e5;
+        }
+        .editor-area.invalid {
+            border-color: #f87171; /* red-400 */
+        }
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #9ca3af; /* gray-400 */
+        }
+        .tab-btn.active {
+            color: #e5e7eb; /* gray-200 */
+            border-color: #4f46e5; /* indigo-500 */
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Simple scrollbar styling for a consistent dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-gray-900/80 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex items-center gap-4">
+            <svg height="24" role="img" viewBox="0 0 98 16"><path fill="#fed047" d="M3 0h10c1.662 0 3 1.338 3 3v10c0 1.662-1.338 3-3 3H3c-1.662 0-3-1.338-3-3V3c0-1.662 1.338-3 3-3"></path><path fill="#642340" d="M11.285 12q-1.12 0-1.728-.608-.608-.619-.608-1.675v-5.61h1.152v5.6q0 .597.299.938.298.342.885.342t.885-.342.299-.938v-5.6h1.152v5.61q0 1.067-.608 1.675T11.285 12m-6.368 0q-1.152 0-1.845-.608t-.694-1.664H3.51q0 .587.384.928.384.33 1.024.33.63 0 .992-.34.363-.342.363-.907 0-.427-.235-.747t-.672-.437l-1.12-.299q-.79-.213-1.248-.779-.448-.565-.448-1.354 0-.64.277-1.11.288-.48.811-.746T4.853 4t1.216.267q.533.266.821.746.3.47.3 1.099H6.057q0-.501-.341-.8-.33-.31-.864-.31t-.864.31q-.32.299-.32.79 0 .394.213.66.224.267.619.374l1.152.31q.81.213 1.28.831t.47 1.462q0 .693-.31 1.205-.31.501-.864.779Q5.674 12 4.917 12" aria-label="SU"></path><path fill="#fff" d="M93.158 12.117 91.185 4.33h1.173l1.259 5.184q.117.47.202.918t.128.693q.043-.245.128-.693.096-.459.214-.928l1.205-5.174h1.184l-1.984 7.787zm-7.83 0V4.33h4.577v1.024h-3.446v2.219h3.072v.992H86.46v2.528h3.446v1.024zm-6.517 0V4.33h2.176q.768 0 1.334.299.565.288.874.832.32.533.32 1.248v3.008q0 .736-.32 1.27-.31.533-.875.831-.565.299-1.333.299zm1.152-1.035h1.024q.63 0 1.003-.362.373-.363.373-1.003V6.709q0-.619-.373-.981-.373-.374-1.003-.374h-1.024zm-5.237 1.142q-.416 0-.683-.246-.256-.256-.256-.672t.256-.672q.267-.266.683-.266t.672.266q.266.256.266.672t-.266.672q-.256.246-.672.246m-6.368 0q-1.152 0-1.845-.608t-.694-1.664h1.13q0 .586.385.928.384.33 1.024.33.63 0 .992-.341.363-.341.363-.907 0-.426-.235-.746t-.672-.438l-1.12-.298q-.79-.214-1.248-.78-.448-.564-.448-1.354 0-.64.277-1.11.288-.48.81-.746.524-.266 1.217-.266t1.216.266q.533.267.821.747.299.47.299 1.099H69.5q0-.502-.342-.8-.33-.31-.864-.31t-.864.31q-.32.298-.32.789 0 .395.213.661.224.267.619.374l1.152.309q.81.213 1.28.832t.47 1.461q0 .694-.31 1.206-.31.5-.864.778-.555.278-1.312.278m-8.288-.107V4.33h1.152v6.742h3.403v1.045zm-6.699 0v-1.045h1.568V5.376h-1.568V4.33h4.32v1.046h-1.579v5.696h1.58v1.045zm-4.821 0V5.376h-2.08V4.33h5.322v1.046h-2.09v6.74zm-5.824.107q-1.12 0-1.728-.608-.608-.62-.608-1.675V4.33h1.152v5.6q0 .597.298.938.299.341.886.341.586 0 .885-.341t.299-.939v-5.6h1.152v5.61q0 1.068-.608 1.676t-1.728.608m-6.315 0q-1.099 0-1.75-.608-.64-.62-.64-1.664V6.496q0-1.056.64-1.664.651-.608 1.75-.608 1.088 0 1.728.618.65.608.65 1.654h-1.151q0-.608-.331-.928-.32-.32-.896-.32-.587 0-.917.32-.32.32-.32.928v3.456q0 .608.32.928.33.32.917.32.576 0 .896-.32.33-.32.33-.928h1.153q0 1.045-.651 1.664-.64.608-1.728.608m-8.683-.107V4.33h4.576v1.024H28.86v2.219h3.072v.992h-3.072v2.528h3.445v1.024zm-4.17.107q-1.152 0-1.846-.608-.693-.608-.693-1.664h1.13q0 .586.385.928.384.33 1.024.33.629 0 .992-.341.362-.341.362-.907 0-.426-.234-.746t-.672-.438l-1.12-.298q-.79-.214-1.248-.78-.448-.564-.448-1.354 0-.64.277-1.11.288-.48.81-.746.523-.266 1.217-.266.693 0 1.216.266.533.267.821.747.299.47.299 1.099h-1.131q0-.502-.341-.8-.331-.31-.864-.31t-.864.31q-.32.298-.32.789 0 .395.213.661.224.267.619.374l1.152.309q.81.213 1.28.832.469.619.469 1.461 0 .694-.31 1.206-.309.5-.863.778-.555.278-1.312.278" aria-label="SECUTILS.DEV"></path></svg>
+            <div>
+                <h1 class="text-2xl font-bold text-white">SAML Decoder</h1>
+                <p class="text-gray-400 text-sm mt-1">Decode Base64-encoded SAML responses, requests, and metadata.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Encoded SAML -->
+            <div class="flex flex-col">
+                <h2 class="text-lg font-semibold mb-2 text-white">Encoded SAML (Base64)</h2>
+                <div class="relative flex-grow">
+                    <textarea id="encoded-saml" spellcheck="false" placeholder="Paste your Base64 encoded SAML here..." class="editor-area w-full h-full border rounded-md p-3 focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Right Column: Decoded XML -->
+            <div class="flex flex-col">
+                 <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-lg font-semibold text-white">Decoded</h2>
+                     <div class="flex gap-2">
+                        <button id="share-button" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-1 px-3 rounded-md text-sm transition-colors">
+                            Share
+                        </button>
+                        <button id="copy-button" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-1 px-3 rounded-md text-sm transition-colors">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-800/50 border border-gray-700/50 rounded-lg shadow-sm flex-grow flex flex-col">
+                    <div class="border-b border-gray-700">
+                        <nav class="flex" id="decoded-tabs">
+                             <button class="tab-btn active" data-tab="xml">XML</button>
+                             <button class="tab-btn" data-tab="attributes">Attributes</button>
+                        </nav>
+                    </div>
+                    <div id="decoded-tab-content" class="p-2 flex-grow">
+                        <div id="xml-tab" class="tab-content active h-full">
+                             <textarea id="decoded-xml" readonly spellcheck="false" class="editor-area w-full h-full border-none rounded-md p-2 focus:outline-none bg-transparent"></textarea>
+                        </div>
+                        <div id="attributes-tab" class="tab-content h-full">
+                            <div class="overflow-auto h-full p-2">
+                                <table class="w-full text-left border-collapse">
+                                    <tbody id="attributes-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-gray-500 text-sm">
+        <p>A single-file SAML tool created by Gemini.</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const encodedSamlInput = document.getElementById('encoded-saml');
+    const decodedXmlOutput = document.getElementById('decoded-xml');
+    const copyButton = document.getElementById('copy-button');
+    const shareButton = document.getElementById('share-button');
+    const tabsContainer = document.getElementById('decoded-tabs');
+    const attributesTableBody = document.getElementById('attributes-table-body');
+    const tabContents = document.getElementById('decoded-tab-content');
+
+    // --- UTILITY FUNCTIONS ---
+
+    const prettyPrintXml = (xml) => {
+        const PADDING = '  ';
+        const reg = /(>)(<)(\/*)/g;
+        let pad = 0;
+        xml = xml.replace(reg, '$1\r\n$2$3');
+        return xml.split('\r\n')
+            .map(node => {
+                let padding = '';
+                if (node.match(/^<\/\w/)) pad--;
+                for (let i = 0; i < pad; i++) padding += PADDING;
+                if (node.match(/^<\w[^>]*[^\/]>.*$/)) pad++;
+                return padding + node;
+            })
+            .join('\r\n');
+    };
+
+    const parseAndDisplayAttributes = (xmlString) => {
+        attributesTableBody.innerHTML = ''; // Clear previous attributes
+        if (!xmlString) return;
+
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            const parserError = xmlDoc.querySelector("parsererror");
+            if (parserError) {
+                console.error("XML Parsing Error:", parserError.textContent);
+                return;
+            }
+
+            const attributeNodes = xmlDoc.getElementsByTagNameNS('*', 'Attribute');
+            if (attributeNodes.length === 0) {
+                attributesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-500 py-4">No attributes found.</td></tr>';
+                return;
+            }
+
+            for (const node of attributeNodes) {
+                const name = node.getAttribute('Name') || node.getAttribute('FriendlyName') || 'N/A';
+                const valueNode = node.getElementsByTagNameNS('*', 'AttributeValue')[0];
+                const value = valueNode ? valueNode.textContent.trim() : '';
+
+                const row = attributesTableBody.insertRow();
+                const cellName = row.insertCell();
+                const cellValue = row.insertCell();
+                cellName.className = "px-2 py-2 font-mono text-sm text-gray-400 align-top";
+                cellValue.className = "px-2 py-2 font-mono text-sm text-gray-200 break-all";
+                cellName.textContent = name;
+                cellValue.textContent = value;
+            }
+        } catch (e) {
+            console.error("Error parsing SAML attributes:", e);
+            attributesTableBody.innerHTML = '<tr><td colspan="2" class="text-center text-red-400 py-4">Error parsing attributes.</td></tr>';
+        }
+    };
+
+    const decodeSaml = () => {
+        let samlValue = encodedSamlInput.value.trim();
+        decodedXmlOutput.classList.remove('invalid');
+        
+        if (!samlValue) {
+            decodedXmlOutput.value = '';
+            parseAndDisplayAttributes('');
+            return;
+        }
+
+        try {
+            try {
+                samlValue = decodeURIComponent(samlValue);
+            } catch(e) { /* Not URL encoded */ }
+            
+            const decodedString = atob(samlValue);
+
+            if (decodedString.trim().startsWith('<')) {
+                const prettyXml = prettyPrintXml(decodedString);
+                decodedXmlOutput.value = prettyXml;
+                parseAndDisplayAttributes(prettyXml);
+            } else {
+                 throw new Error("Decoded content is not valid XML.");
+            }
+            
+        } catch (error) {
+            console.error("SAML decoding failed:", error);
+            const errorMessage = `Error: ${error.message}\n\nPlease check if the input is a valid Base64-encoded SAML document.`;
+            decodedXmlOutput.value = errorMessage;
+            decodedXmlOutput.classList.add('invalid');
+            parseAndDisplayAttributes(''); // Clear attributes on error
+        }
+    };
+    
+    // --- EVENT LISTENERS ---
+
+    encodedSamlInput.addEventListener('input', decodeSaml);
+    
+    copyButton.addEventListener('click', () => {
+        const activeTab = tabsContainer.querySelector('.active').dataset.tab;
+        let contentToCopy = '';
+
+        if (activeTab === 'xml') {
+            contentToCopy = decodedXmlOutput.value;
+        } else {
+            const rows = attributesTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 2) {
+                     contentToCopy += `${cells[0].textContent}: ${cells[1].textContent}\n`;
+                }
+            });
+        }
+
+        if (!contentToCopy) return;
+        
+        navigator.clipboard.writeText(contentToCopy.trim()).then(() => {
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+            }, 2000);
+        });
+    });
+
+    shareButton.addEventListener('click', () => {
+        const samlValue = encodedSamlInput.value.trim();
+        if (!samlValue) return;
+
+        const encodedSamlForUrl = encodeURIComponent(samlValue);
+        const shareUrl = `${window.location.origin}${window.location.pathname}?saml=${encodedSamlForUrl}`;
+        
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            shareButton.textContent = 'Link Copied!';
+            setTimeout(() => {
+                shareButton.textContent = 'Share';
+            }, 2000);
+        });
+    });
+    
+    tabsContainer.addEventListener('click', e => {
+        if (e.target.classList.contains('tab-btn')) {
+            tabsContainer.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            tabContents.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${e.target.dataset.tab}-tab`).classList.add('active');
+        }
+    });
+
+    const initialize = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const samlFromQuery = urlParams.get('saml');
+        if (samlFromQuery) {
+            encodedSamlInput.value = samlFromQuery;
+        }
+        decodeSaml();
+    };
+    
+    initialize();
+});
+</script>
+
+</body>
+</html>
